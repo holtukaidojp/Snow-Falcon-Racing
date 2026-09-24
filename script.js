@@ -1,272 +1,876 @@
-/* =============================================
-   SCRIPT.JS - SVR Professional Website
-   Sapporo Velocity Racing
-   ============================================= */
+/* =========================================================
+   SNOW FALCON RACING
+   Official Website - script.js
+   ========================================================= */
 
-// =============================================
-// SCROLL ANIMATIONS WITH INTERSECTION OBSERVER
-// =============================================
 
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry, index) => {
-        if (entry.isIntersecting) {
-            // Remove hidden class and add show class
-            entry.target.classList.remove('hidden');
-            entry.target.classList.add('show');
-            
-            // Add delay class for staggered animation
-            const delayClass = `delay-${(index % 8) + 1}`;
-            entry.target.classList.add(delayClass);
-            
-            // Animate numbers if it's a stat counter
-            if (entry.target.classList.contains('number')) {
-                animateCounter(entry.target);
-            }
-            
-            // Stop observing this element
-            observer.unobserve(entry.target);
+/* =========================================================
+   DOM READY
+========================================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    initScrollReveal();
+    initSmoothScroll();
+    initMobileMenu();
+    initHeader();
+    initCounters();
+    initHeroParallax();
+    initHoverEffects();
+    initKeyboardNavigation();
+    initDynamicYear();
+
+    console.log(
+        "%cSNOW FALCON RACING",
+        "font-size:20px;font-weight:900;color:#0066ff;"
+    );
+
+    console.log(
+        "%cSFR OFFICIAL WEBSITE",
+        "font-size:12px;color:#666;"
+    );
+
+});
+
+
+/* =========================================================
+   SCROLL REVEAL
+========================================================= */
+
+function initScrollReveal() {
+
+    const elements = document.querySelectorAll(
+        ".section, .about-card, .race-card, .stat-card, .member-card, .sponsor-item, .social-link"
+    );
+
+    if (!elements.length) return;
+
+
+    /*
+        Intersection Observer
+        要素が画面に入ったら .visible を追加
+    */
+
+    const observer = new IntersectionObserver(
+        (entries, observerInstance) => {
+
+            entries.forEach((entry, index) => {
+
+                if (!entry.isIntersecting) return;
+
+                /*
+                    少しずつ時間をずらして表示
+                */
+
+                entry.target.style.setProperty(
+                    "--reveal-delay",
+                    `${(index % 4) * 100}ms`
+                );
+
+                entry.target.classList.add("visible");
+
+                observerInstance.unobserve(entry.target);
+
+            });
+
+        },
+        {
+            threshold: 0.12,
+            rootMargin: "0px 0px -60px 0px"
         }
+    );
+
+
+    elements.forEach(element => {
+
+        element.classList.add("reveal");
+
+        observer.observe(element);
+
     });
-}, {
-    threshold: 0.15,
-    rootMargin: '0px 0px -100px 0px'
-});
 
-// Observe all elements with hidden class
-document.querySelectorAll('.hidden').forEach(el => {
-    observer.observe(el);
-});
+}
 
-// =============================================
-// COUNTER ANIMATION FOR STATISTICS
-// =============================================
+
+/* =========================================================
+   SMOOTH SCROLL
+========================================================= */
+
+function initSmoothScroll() {
+
+    const links = document.querySelectorAll(
+        'a[href^="#"]'
+    );
+
+
+    links.forEach(link => {
+
+        link.addEventListener("click", function (event) {
+
+            const targetId = this.getAttribute("href");
+
+            if (
+                !targetId ||
+                targetId === "#"
+            ) {
+                return;
+            }
+
+
+            const target = document.querySelector(targetId);
+
+            if (!target) return;
+
+
+            event.preventDefault();
+
+
+            const header = document.querySelector(".site-header");
+
+            const headerHeight =
+                header ? header.offsetHeight : 0;
+
+
+            const targetPosition =
+                target.getBoundingClientRect().top +
+                window.scrollY -
+                headerHeight;
+
+
+            window.scrollTo({
+
+                top: targetPosition,
+
+                behavior: "smooth"
+
+            });
+
+
+            /*
+                モバイルメニューを閉じる
+            */
+
+            closeMobileMenu();
+
+        });
+
+    });
+
+}
+
+
+/* =========================================================
+   MOBILE MENU
+========================================================= */
+
+function initMobileMenu() {
+
+    const button =
+        document.querySelector(".menu-button");
+
+    const menu =
+        document.querySelector(".mobile-menu");
+
+
+    if (!button || !menu) return;
+
+
+    button.addEventListener("click", () => {
+
+        const isOpen =
+            menu.classList.contains("active");
+
+
+        if (isOpen) {
+
+            closeMobileMenu();
+
+        } else {
+
+            openMobileMenu();
+
+        }
+
+    });
+
+
+    /*
+        メニュー外をクリックしたら閉じる
+    */
+
+    document.addEventListener("click", (event) => {
+
+        if (
+            !menu.classList.contains("active")
+        ) {
+            return;
+        }
+
+
+        if (
+            !menu.contains(event.target) &&
+            !button.contains(event.target)
+        ) {
+
+            closeMobileMenu();
+
+        }
+
+    });
+
+
+    /*
+        ESCキーで閉じる
+    */
+
+    document.addEventListener("keydown", (event) => {
+
+        if (event.key === "Escape") {
+
+            closeMobileMenu();
+
+        }
+
+    });
+
+}
+
+
+function openMobileMenu() {
+
+    const button =
+        document.querySelector(".menu-button");
+
+    const menu =
+        document.querySelector(".mobile-menu");
+
+
+    if (!button || !menu) return;
+
+
+    button.classList.add("active");
+
+    menu.classList.add("active");
+
+    document.body.classList.add("menu-open");
+
+}
+
+
+function closeMobileMenu() {
+
+    const button =
+        document.querySelector(".menu-button");
+
+    const menu =
+        document.querySelector(".mobile-menu");
+
+
+    if (!button || !menu) return;
+
+
+    button.classList.remove("active");
+
+    menu.classList.remove("active");
+
+    document.body.classList.remove("menu-open");
+
+}
+
+
+/* =========================================================
+   HEADER
+========================================================= */
+
+function initHeader() {
+
+    const header =
+        document.querySelector(".site-header");
+
+
+    if (!header) return;
+
+
+    let ticking = false;
+
+
+    function updateHeader() {
+
+        if (window.scrollY > 40) {
+
+            header.classList.add("scrolled");
+
+        } else {
+
+            header.classList.remove("scrolled");
+
+        }
+
+
+        ticking = false;
+
+    }
+
+
+    window.addEventListener(
+        "scroll",
+        () => {
+
+            if (!ticking) {
+
+                window.requestAnimationFrame(
+                    updateHeader
+                );
+
+                ticking = true;
+
+            }
+
+        },
+        {
+            passive: true
+        }
+    );
+
+
+    updateHeader();
+
+}
+
+
+/* =========================================================
+   NUMBER COUNTER
+========================================================= */
+
+function initCounters() {
+
+    const counters =
+        document.querySelectorAll(".number[data-target]");
+
+
+    if (!counters.length) return;
+
+
+    const counterObserver =
+        new IntersectionObserver(
+            (entries, observer) => {
+
+                entries.forEach(entry => {
+
+                    if (!entry.isIntersecting) return;
+
+
+                    const element =
+                        entry.target;
+
+
+                    animateCounter(element);
+
+
+                    observer.unobserve(element);
+
+                });
+
+            },
+            {
+                threshold: 0.5
+            }
+        );
+
+
+    counters.forEach(counter => {
+
+        counterObserver.observe(counter);
+
+    });
+
+}
+
 
 function animateCounter(element) {
-    const target = parseInt(element.getAttribute('data-target')) || 0;
-    
-    if (isNaN(target) || target === 0) return;
-    
-    const duration = 2500; // 2.5 seconds
-    const start = Date.now();
-    const startValue = 0;
-    
-    const animate = () => {
-        const now = Date.now();
-        const progress = Math.min((now - start) / duration, 1);
-        
-        // Easing function for smooth animation
-        const easeOut = 1 - Math.pow(1 - progress, 3);
-        const current = Math.floor(easeOut * (target - startValue) + startValue);
-        
-        element.textContent = current.toLocaleString('ja-JP');
-        
+
+    const target =
+        parseInt(
+            element.dataset.target,
+            10
+        );
+
+
+    if (
+        Number.isNaN(target) ||
+        target <= 0
+    ) {
+        return;
+    }
+
+
+    const duration = 1800;
+
+    const startTime =
+        performance.now();
+
+
+    function update(currentTime) {
+
+        const elapsed =
+            currentTime - startTime;
+
+
+        const progress =
+            Math.min(
+                elapsed / duration,
+                1
+            );
+
+
+        /*
+            easeOutCubic
+        */
+
+        const eased =
+            1 -
+            Math.pow(
+                1 - progress,
+                3
+            );
+
+
+        const value =
+            Math.floor(
+                target * eased
+            );
+
+
+        element.textContent =
+            value.toLocaleString("ja-JP");
+
+
         if (progress < 1) {
-            requestAnimationFrame(animate);
+
+            requestAnimationFrame(update);
+
         } else {
-            element.textContent = target.toLocaleString('ja-JP');
+
+            element.textContent =
+                target.toLocaleString("ja-JP");
+
         }
-    };
-    
-    requestAnimationFrame(animate);
+
+    }
+
+
+    requestAnimationFrame(update);
+
 }
 
-// =============================================
-// SMOOTH SCROLLING FOR NAVIGATION LINKS
-// =============================================
 
-document.querySelectorAll('.nav a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function (e) {
-        e.preventDefault();
-        
-        const targetId = this.getAttribute('href');
-        const target = document.querySelector(targetId);
-        
-        if (target) {
-            // Calculate offset to account for fixed header
-            const headerHeight = document.querySelector('header').offsetHeight;
-            const targetPosition = target.offsetTop - headerHeight;
-            
-            window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
-            });
+/* =========================================================
+   HERO PARALLAX
+========================================================= */
+
+function initHeroParallax() {
+
+    const hero =
+        document.querySelector(".hero");
+
+
+    if (!hero) return;
+
+
+    /*
+        モバイルでは負荷軽減のため無効
+    */
+
+    const isMobile =
+        window.matchMedia(
+            "(max-width: 768px)"
+        ).matches;
+
+
+    if (isMobile) return;
+
+
+    let ticking = false;
+
+
+    function updateHero() {
+
+        const scrollY =
+            window.scrollY;
+
+
+        const heroHeight =
+            hero.offsetHeight;
+
+
+        if (
+            scrollY <= heroHeight
+        ) {
+
+            /*
+                背景グリッドを少し動かす
+            */
+
+            hero.style.setProperty(
+                "--hero-scroll",
+                `${scrollY * 0.15}px`
+            );
+
         }
-    });
-});
 
-// =============================================
-// PARALLAX EFFECT ON HERO SECTION
-// =============================================
 
-let ticking = false;
-let heroParallax = null;
+        ticking = false;
 
-function updateParallax() {
-    if (!heroParallax) {
-        heroParallax = document.querySelector('.hero');
     }
-    
-    if (heroParallax) {
-        const scrolled = window.scrollY;
-        const heroBottom = heroParallax.offsetTop + heroParallax.offsetHeight;
-        
-        if (scrolled < heroBottom) {
-            const parallaxFactor = scrolled * 0.5;
-            heroParallax.style.backgroundPosition = `center ${parallaxFactor}px`;
+
+
+    window.addEventListener(
+        "scroll",
+        () => {
+
+            if (!ticking) {
+
+                requestAnimationFrame(
+                    updateHero
+                );
+
+                ticking = true;
+
+            }
+
+        },
+        {
+            passive: true
         }
-    }
-    
-    ticking = false;
+    );
+
 }
 
-window.addEventListener('scroll', () => {
-    if (!ticking) {
-        window.requestAnimationFrame(updateParallax);
-        ticking = true;
-    }
-});
 
-// =============================================
-// HERO BUTTON CLICK EVENT
-// =============================================
+/* =========================================================
+   HOVER EFFECTS
+========================================================= */
 
-const heroBtn = document.querySelector('.hero-btn');
-if (heroBtn) {
-    heroBtn.addEventListener('click', () => {
-        const aboutSection = document.querySelector('#about');
-        if (aboutSection) {
-            const headerHeight = document.querySelector('header').offsetHeight;
-            const targetPosition = aboutSection.offsetTop - headerHeight;
-            
-            window.scrollTo({
-                top: targetPosition,
-                behavior: 'smooth'
-            });
+function initHoverEffects() {
+
+    /*
+        Member cards
+    */
+
+    const members =
+        document.querySelectorAll(
+            ".member-card"
+        );
+
+
+    members.forEach(card => {
+
+        card.addEventListener(
+            "mouseenter",
+            () => {
+
+                card.classList.add("hovered");
+
+            }
+        );
+
+
+        card.addEventListener(
+            "mouseleave",
+            () => {
+
+                card.classList.remove("hovered");
+
+            }
+        );
+
+    });
+
+
+    /*
+        Sponsor cards
+    */
+
+    const sponsors =
+        document.querySelectorAll(
+            ".sponsor-item"
+        );
+
+
+    sponsors.forEach(item => {
+
+        item.addEventListener(
+            "mouseenter",
+            () => {
+
+                item.classList.add("hovered");
+
+            }
+        );
+
+
+        item.addEventListener(
+            "mouseleave",
+            () => {
+
+                item.classList.remove("hovered");
+
+            }
+        );
+
+    });
+
+}
+
+
+/* =========================================================
+   KEYBOARD NAVIGATION
+========================================================= */
+
+function initKeyboardNavigation() {
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            /*
+                入力欄ではショートカットを無効化
+            */
+
+            const tag =
+                document.activeElement?.tagName;
+
+
+            if (
+                tag === "INPUT" ||
+                tag === "TEXTAREA" ||
+                tag === "SELECT"
+            ) {
+                return;
+            }
+
+
+            /*
+                H = Home
+            */
+
+            if (
+                event.key === "h" ||
+                event.key === "H"
+            ) {
+
+                window.scrollTo({
+
+                    top: 0,
+
+                    behavior: "smooth"
+
+                });
+
+            }
+
+
+            /*
+                A = About
+            */
+
+            if (
+                event.key === "a" ||
+                event.key === "A"
+            ) {
+
+                scrollToSection(
+                    "#about"
+                );
+
+            }
+
+
+            /*
+                R = Racing
+            */
+
+            if (
+                event.key === "r" ||
+                event.key === "R"
+            ) {
+
+                scrollToSection(
+                    "#racing"
+                );
+
+            }
+
+
+            /*
+                T = Team
+            */
+
+            if (
+                event.key === "t" ||
+                event.key === "T"
+            ) {
+
+                scrollToSection(
+                    "#members"
+                );
+
+            }
+
         }
-    });
+    );
+
 }
 
-// =============================================
-// ADD SCROLL INDICATOR TO HEADER
-// =============================================
 
-let lastScrollY = 0;
-const header = document.querySelector('header');
+/* =========================================================
+   SECTION SCROLL HELPER
+========================================================= */
 
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-        if (!header.classList.contains('scrolled')) {
-            header.classList.add('scrolled');
-        }
-    } else {
-        header.classList.remove('scrolled');
-    }
-    
-    lastScrollY = window.scrollY;
-});
+function scrollToSection(selector) {
 
-// =============================================
-// DYNAMIC YEAR IN FOOTER
-// =============================================
+    const target =
+        document.querySelector(selector);
 
-document.addEventListener('DOMContentLoaded', () => {
-    const currentYear = new Date().getFullYear();
-    const footerText = document.querySelector('.footer-info p');
-    
-    if (footerText) {
-        footerText.textContent = `© ${currentYear} Sapporo Velocity Racing. All rights reserved.`;
-    }
-});
 
-// =============================================
-// ADD SCROLL STYLE TO HEADER
-// =============================================
+    if (!target) return;
 
-const style = document.createElement('style');
-style.textContent = `
-    header.scrolled {
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-        background: rgba(255, 255, 255, 0.98);
-    }
-`;
-document.head.appendChild(style);
 
-// =============================================
-// GALLERY IMAGE INTERACTION
-// =============================================
+    const header =
+        document.querySelector(".site-header");
 
-const galleryItems = document.querySelectorAll('.gallery-item');
 
-galleryItems.forEach(item => {
-    item.addEventListener('mouseenter', function() {
-        this.style.zIndex = '10';
+    const headerHeight =
+        header ? header.offsetHeight : 0;
+
+
+    const position =
+        target.getBoundingClientRect().top +
+        window.scrollY -
+        headerHeight;
+
+
+    window.scrollTo({
+
+        top: position,
+
+        behavior: "smooth"
+
     });
-    
-    item.addEventListener('mouseleave', function() {
-        this.style.zIndex = '1';
-    });
-});
 
-// =============================================
-// TOUCH SUPPORT FOR MOBILE
-// =============================================
-
-if (window.matchMedia('(max-width: 768px)').matches) {
-    // Disable parallax on mobile for better performance
-    window.removeEventListener('scroll', updateParallax);
 }
 
-// =============================================
-// ACCESSIBILITY - KEYBOARD NAVIGATION
-// =============================================
 
-document.addEventListener('keydown', (e) => {
-    // Press 'H' to scroll to Hero
-    if (e.key === 'h' || e.key === 'H') {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    
-    // Press 'A' to scroll to About
-    if (e.key === 'a' || e.key === 'A') {
-        const aboutSection = document.querySelector('#about');
-        if (aboutSection) {
-            const headerHeight = document.querySelector('header').offsetHeight;
-            const targetPosition = aboutSection.offsetTop - headerHeight;
-            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
-        }
-    }
-});
+/* =========================================================
+   DYNAMIC YEAR
+========================================================= */
 
-// =============================================
-// PERFORMANCE MONITORING
-// =============================================
+function initDynamicYear() {
 
-if (window.requestIdleCallback) {
-    requestIdleCallback(() => {
-        console.log('SVR Website loaded successfully');
-    });
-} else {
-    setTimeout(() => {
-        console.log('SVR Website loaded successfully');
-    }, 2000);
+    const year =
+        new Date().getFullYear();
+
+
+    /*
+        フッターの2026を現在年に変更
+    */
+
+    const footer =
+        document.querySelector("footer");
+
+
+    if (!footer) return;
+
+
+    const footerText =
+        footer.querySelector(
+            ".footer-bottom span:first-child"
+        );
+
+
+    if (!footerText) return;
+
+
+    footerText.textContent =
+        `© ${year} Snow Falcon Racing`;
+
 }
 
-// =============================================
-// PRELOAD IMAGES
-// =============================================
 
-function preloadImages() {
-    const images = [
-        'https://images.unsplash.com/photo-1541625602330-2277a4c46182?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=1200&q=80',
-        'https://images.unsplash.com/photo-1558618047-fcd25c85cd64?auto=format&fit=crop&w=1200&q=80'
-    ];
-    
-    images.forEach(src => {
-        const img = new Image();
-        img.src = src;
-    });
+/* =========================================================
+   PAGE LOAD EFFECT
+========================================================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        document.body.classList.add(
+            "page-loaded"
+        );
+
+    }
+);
+
+
+/* =========================================================
+   REDUCED MOTION
+========================================================= */
+
+const reducedMotion =
+    window.matchMedia(
+        "(prefers-reduced-motion: reduce)"
+    );
+
+
+if (reducedMotion.matches) {
+
+    document.documentElement.style
+        .scrollBehavior = "auto";
+
 }
 
-// Preload images after page load
-window.addEventListener('load', preloadImages);
+
+/* =========================================================
+   RESIZE HANDLER
+========================================================= */
+
+let resizeTimer;
+
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        clearTimeout(resizeTimer);
+
+
+        resizeTimer = setTimeout(() => {
+
+            /*
+                PCへ戻ったときに
+                メニュー状態をリセット
+            */
+
+            if (
+                window.innerWidth > 768
+            ) {
+
+                closeMobileMenu();
+
+            }
+
+        }, 150);
+
+    }
+);
+
+
+/* =========================================================
+   SFR WEBSITE READY
+========================================================= */
+
+console.log(
+    "%c⚡ SFR website initialized",
+    "font-weight:bold;color:#0066ff;"
+);
